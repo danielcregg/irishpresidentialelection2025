@@ -232,7 +232,7 @@ export default function IrishElectionDemo() {
       });
       setLiveOdds(nextOdds);
       setOddsLastUpdated(new Date());
-    } catch (e):
+    } catch (e) {
       setOddsLastUpdated(new Date());
     finally:
       setOddsLoading(false);

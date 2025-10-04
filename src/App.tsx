@@ -1,4 +1,3 @@
-\
 import React, { useState, useEffect, useMemo } from 'react';
 import { Award, Info, Users, RefreshCw, Lock, Unlock, MapPin, Briefcase, Heart, X, TrendingUp } from 'lucide-react';
 

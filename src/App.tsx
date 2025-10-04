@@ -7,6 +7,9 @@ import { Award, Info, Users, RefreshCw, Lock, Unlock, MapPin, Briefcase, Heart, 
  * - Keeps: stacked Round-2 bars, focused Transfer panel, hide-on-51%, live odds, and single-lock behavior
  */
 
+// Icon component wrapper for cleaner imports
+const Icons = { Award, Info, Users, RefreshCw, Lock, Unlock, MapPin, Briefcase, Heart, X, TrendingUp };
+
 export default function IrishElectionDemo() {
   // --- Candidate data ---
   const candidates = [
@@ -66,15 +69,15 @@ export default function IrishElectionDemo() {
   const [turnout, setTurnout] = useState(60);
   const totalVotes = Math.round(totalElectorate * (turnout / 100));
 
-  const [rounds, setRounds] = useState<any[]>([]);
-  const [winner, setWinner] = useState<string | null>(null);
-  const [selectedCandidate, setSelectedCandidate] = useState<any | null>(null);
+  const [rounds, setRounds] = useState([]);
+  const [winner, setWinner] = useState(null);
+  const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [showStvInfo, setShowStvInfo] = useState(false);
 
   // --- Live odds state (with safe fallback) ---
   const [liveOdds, setLiveOdds] = useState({ connolly: '34%', gavin: '18%', humphreys: '48%' });
   const [oddsLoading, setOddsLoading] = useState(false);
-  const [oddsLastUpdated, setOddsLastUpdated] = useState<Date | null>(null);
+  const [oddsLastUpdated, setOddsLastUpdated] = useState(null);
 
   // --- Derived ---
   const quota = Math.floor(totalVotes / 2) + 1;
@@ -85,11 +88,11 @@ export default function IrishElectionDemo() {
 
   // Focused Transfer panel: identify the currently lowest first-prefs candidate
   const eliminatedUI = useMemo(() => {
-    const entries = Object.entries(firstPrefs) as [string, number][];
+    const entries = Object.entries(firstPrefs);
     entries.sort((a, b) => a[1] - b[1]);
     return entries[0][0];
   }, [firstPrefs]);
-  const remainingForUI = useMemo(() => candidates.filter((c) => c.id !== eliminatedUI), [candidates, eliminatedUI]);
+  const remainingForUI = useMemo(() => candidates.filter((c) => c.id !== eliminatedUI), [eliminatedUI]);
 
   // --- Effects ---
   useEffect(() => {
@@ -108,41 +111,41 @@ export default function IrishElectionDemo() {
       humphreys: Math.round(totalVotes * (firstPrefs.humphreys / 100)),
     };
 
-    const roundsData: any[] = [
+    const roundsData = [
       {
         round: 1,
         votes: { ...currentVotes },
         eliminated: null,
         transferred: 0,
-        transferTo: {} as Record<string, number>,
+        transferTo: {},
         description: 'First Preference Count',
       },
     ];
 
     // Winner in first round?
-    const firstRoundWinner = Object.keys(currentVotes).find((c) => (currentVotes as any)[c] >= quota);
+    const firstRoundWinner = Object.keys(currentVotes).find((c) => currentVotes[c] >= quota);
     if (firstRoundWinner) {
       setRounds(roundsData);
-      setWinner(firstRoundWinner as string);
+      setWinner(firstRoundWinner);
       return;
     }
 
     // Eliminate lowest (tie breaks by array order)
     const sorted = [...Object.entries(currentVotes)].sort((a, b) => a[1] - b[1]);
-    const eliminated = sorted[0][0] as string;
-    const eliminatedVotes = (currentVotes as any)[eliminated];
+    const eliminated = sorted[0][0];
+    const eliminatedVotes = currentVotes[eliminated];
 
     const remaining = Object.keys(currentVotes).filter((c) => c !== eliminated);
-    const transferTo: Record<string, number> = {};
+    const transferTo = {};
     remaining.forEach((c) => {
-      const pct = (transferPrefs as any)[eliminated][c];
+      const pct = transferPrefs[eliminated][c];
       transferTo[c] = Math.round(eliminatedVotes * (pct / 100));
     });
 
-    const round2Votes: Record<string, number> = { ...currentVotes };
-    delete (round2Votes as any)[eliminated];
+    const round2Votes = { ...currentVotes };
+    delete round2Votes[eliminated];
     Object.keys(transferTo).forEach((c) => {
-      (round2Votes as any)[c] += transferTo[c];
+      round2Votes[c] += transferTo[c];
     });
 
     roundsData.push({
@@ -151,24 +154,24 @@ export default function IrishElectionDemo() {
       eliminated,
       transferred: eliminatedVotes,
       transferTo,
-      description: `${(candidates.find((c) => c.id === eliminated) as any)?.shortName} eliminated - votes transferred`,
+      description: `${candidates.find((c) => c.id === eliminated)?.shortName} eliminated - votes transferred`,
     });
 
-    const finalWinner = Object.keys(round2Votes).reduce((a, b) => ((round2Votes as any)[a] > (round2Votes as any)[b] ? a : b));
+    const finalWinner = Object.keys(round2Votes).reduce((a, b) => (round2Votes[a] > round2Votes[b] ? a : b));
 
     setRounds(roundsData);
     setWinner(finalWinner);
   };
 
-  const handleFirstPrefChange = (candidateId: string, value: string | number) => {
+  const handleFirstPrefChange = (candidateId, value) => {
     const v = Math.max(0, Math.min(100, parseInt(String(value)) || 0));
 
     setFirstPrefs((prev) => {
-      const next: any = { ...prev, [candidateId]: v };
+      const next = { ...prev, [candidateId]: v };
 
       // Single-lock aware balancing
-      const lockedIds = Object.keys(next).filter((id) => (lockedCandidates as any)[id] && id !== candidateId);
-      const unlockedIds = Object.keys(next).filter((id) => !(lockedCandidates as any)[id] && id !== candidateId);
+      const lockedIds = Object.keys(next).filter((id) => lockedCandidates[id] && id !== candidateId);
+      const unlockedIds = Object.keys(next).filter((id) => !lockedCandidates[id] && id !== candidateId);
 
       const lockedSum = lockedIds.reduce((s, id) => s + next[id], 0);
       let remaining = 100 - v - lockedSum;
@@ -186,9 +189,9 @@ export default function IrishElectionDemo() {
   };
 
   // Only one candidate can be locked at any time
-  const toggleLock = (candidateId: string) => {
+  const toggleLock = (candidateId) => {
     setLockedCandidates((prev) => {
-      const currentlyLockedId = Object.keys(prev).find((id) => (prev as any)[id]);
+      const currentlyLockedId = Object.keys(prev).find((id) => prev[id]);
       if (currentlyLockedId === candidateId) {
         return { connolly: false, gavin: false, humphreys: false };
       }
@@ -201,16 +204,16 @@ export default function IrishElectionDemo() {
   };
 
   // Slider helper: single slider per eliminated candidate (2 recipients). Adjusts the other automatically.
-  const handleTransferSlider = (fromId: string, primaryToId: string, value: string | number) => {
+  const handleTransferSlider = (fromId, primaryToId, value) => {
     const v = Math.max(0, Math.min(100, parseInt(String(value)) || 0));
-    const otherId = Object.keys((transferPrefs as any)[fromId]).find((k) => k !== primaryToId)!;
+    const otherId = Object.keys(transferPrefs[fromId]).find((k) => k !== primaryToId);
     setTransferPrefs((prev) => ({
       ...prev,
-      [fromId]: { ...(prev as any)[fromId], [primaryToId]: v, [otherId]: 100 - v },
+      [fromId]: { ...prev[fromId], [primaryToId]: v, [otherId]: 100 - v },
     }));
   };
 
-  const getVotePct = (votes: number) => ((votes / totalVotes) * 100).toFixed(1);
+  const getVotePct = (votes) => ((votes / totalVotes) * 100).toFixed(1);
 
   // --- Live odds fetch (best-effort, CORS-safe) ---
   async function fetchLiveOdds() {
@@ -222,19 +225,19 @@ export default function IrishElectionDemo() {
       const first = Array.isArray(data) ? data[0] : undefined;
       const markets = first && Array.isArray(first.markets) ? first.markets : [];
       const nextOdds = { ...liveOdds };
-      markets.forEach((m: any) => {
+      markets.forEach((m) => {
         const q = m && typeof m.question === 'string' ? m.question.toLowerCase() : '';
         const prob = m && typeof m.clobProbability === 'number' ? Math.round(m.clobProbability * 100) + '%' : null;
         if (!prob) return;
-        if (q.includes('connolly')) (nextOdds as any).connolly = prob;
-        if (q.includes('gavin')) (nextOdds as any).gavin = prob;
-        if (q.includes('humphreys')) (nextOdds as any).humphreys = prob;
+        if (q.includes('connolly')) nextOdds.connolly = prob;
+        if (q.includes('gavin')) nextOdds.gavin = prob;
+        if (q.includes('humphreys')) nextOdds.humphreys = prob;
       });
       setLiveOdds(nextOdds);
       setOddsLastUpdated(new Date());
     } catch (e) {
       setOddsLastUpdated(new Date());
-    finally:
+    } finally {
       setOddsLoading(false);
     }
   }
@@ -388,14 +391,14 @@ export default function IrishElectionDemo() {
             </div>
 
             {/* Transfer Preferences (hidden if first-round majority ≥51%) */}
-            {!hideTransfers and (() => {
-              const entries = Object.entries(firstPrefs) as [string, number][];
+            {!hideTransfers && (() => {
+              const entries = Object.entries(firstPrefs);
               entries.sort((a, b) => a[1] - b[1]);
               const eliminated = entries[0][0];
               const others = candidates.filter((c) => c.id !== eliminated);
               const [toA, toB] = others;
-              const valueA = (transferPrefs as any)[eliminated][toA.id];
-              const valueB = (transferPrefs as any)[eliminated][toB.id];
+              const valueA = transferPrefs[eliminated][toA.id];
+              const valueB = transferPrefs[eliminated][toB.id];
               return (
                 <div className="bg-white rounded-lg shadow p-3">
                   <h2 className="text-sm font-bold text-gray-800 mb-2 flex items-center gap-1">
@@ -469,13 +472,13 @@ export default function IrishElectionDemo() {
                     </div>
                     <div className="text-xs text-gray-600 mb-1">{round.description}</div>
                     {Object.entries(round.votes).map(([cid, votes]) => {
-                      const c = candidates.find((x) => x.id === cid)!;
-                      const pct = parseFloat(getVotePct(votes as number));
-                      const hasQuota = (votes as number) >= quota;
+                      const c = candidates.find((x) => x.id === cid);
+                      const pct = parseFloat(getVotePct(votes));
+                      const hasQuota = votes >= quota;
                       const gained = round.transferTo && round.transferTo[cid] ? round.transferTo[cid] : 0;
 
                       // Stacked viz: base (Round 1) + transfers (Round 2)
-                      const baseVotes = (rounds[0]?.votes?.[cid] ?? 0) as number;
+                      const baseVotes = rounds[0]?.votes?.[cid] ?? 0;
                       const basePct = parseFloat(getVotePct(baseVotes));
                       const transferPct = parseFloat(getVotePct(gained));
 
@@ -485,9 +488,9 @@ export default function IrishElectionDemo() {
                             <div className="flex items-center gap-1">
                               <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.color }} />
                               <span className="font-semibold">{c.shortName}</span>
-                              {gained > 0 && <span className="text-green-600 font-bold text-xs">+{((gained as number) / 1_000).toFixed(0)}K</span>}
+                              {gained > 0 && <span className="text-green-600 font-bold text-xs">+{(gained / 1_000).toFixed(0)}K</span>}
                             </div>
-                            <div className="font-bold">{((votes as number) / 1_000).toFixed(0)}K</div>
+                            <div className="font-bold">{(votes / 1_000).toFixed(0)}K</div>
                           </div>
 
                           <div className="relative h-4 bg-gray-200 rounded overflow-hidden">
@@ -507,7 +510,7 @@ export default function IrishElectionDemo() {
                             <div className="relative h-full flex items-center justify-center text-white text-xs font-bold">
                               {pct.toFixed(1)}%
                             </div>
-                            {hasQuota and (
+                            {hasQuota && (
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <span className="text-white font-bold text-xs bg-green-600 px-1 rounded">✓</span>
                               </div>
@@ -521,7 +524,7 @@ export default function IrishElectionDemo() {
               </div>
 
               {/* Winner (no animation gating) */}
-              {winner and (
+              {winner && (
                 <div className="mt-3 p-3 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg text-white text-center">
                   <Icons.Award className="w-8 h-8 mx-auto mb-1" />
                   <div className="text-lg font-bold">WINNER!</div>
@@ -544,7 +547,7 @@ export default function IrishElectionDemo() {
                     <h2 className="text-xl font-bold text-gray-800">{selectedCandidate.name}</h2>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="px-2 py-0.5 rounded-full text-white text-xs font-semibold" style={{ backgroundColor: selectedCandidate.color }}>{selectedCandidate.party}</span>
-                      <span className="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs font-bold">{(liveOdds as any)[selectedCandidate.id] || '--'} Win Prob</span>
+                      <span className="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs font-bold">{liveOdds[selectedCandidate.id] || '--'} Win Prob</span>
                     </div>
                     <div className="flex items-center gap-1 text-gray-600 mt-1">
                       <Icons.MapPin className="w-3 h-3" />
@@ -562,7 +565,7 @@ export default function IrishElectionDemo() {
                 </section>
                 <section>
                   <div className="flex items-center gap-1 mb-1"><Icons.Heart className="w-4 h-4 text-gray-600" /><h3 className="font-bold text-sm text-gray-800">Key Policies</h3></div>
-                  <div className="flex flex-wrap gap-1">{selectedCandidate.keyPolicies.map((p: string, i: number) => (<span key={i} className="px-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-700">{p}</span>))}</div>
+                  <div className="flex flex-wrap gap-1">{selectedCandidate.keyPolicies.map((p, i) => (<span key={i} className="px-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-700">{p}</span>))}</div>
                 </section>
                 <section>
                   <div className="flex items-center gap-1 mb-1"><Icons.Award className="w-4 h-4 text-gray-600" /><h3 className="font-bold text-sm text-gray-800">Experience</h3></div>
@@ -600,7 +603,7 @@ export default function IrishElectionDemo() {
 /**
  * Helpers for rounding clamp in stacked bars (TS narrow). Kept small & inline.
  */
-function max0to100(n: number, cap: number = 100): number {
+function max0to100(n, cap = 100) {
   const x = Math.max(0, Math.min(n, 100));
   return Math.min(x, cap);
 }
@@ -613,7 +616,7 @@ if (typeof window !== 'undefined') {
   (function runDevTests() {
     try {
       // Test 1: transfer pair sums to 100
-      const split = (a: number) => ({ a, b: 100 - a });
+      const split = (a) => ({ a, b: 100 - a });
       const t1 = split(73);
       console.assert(t1.a + t1.b === 100, 'Transfer split should sum to 100');
 
@@ -625,7 +628,7 @@ if (typeof window !== 'undefined') {
         connolly: Math.round(total * (fv.connolly / 100)),
         gavin: Math.round(total * (fv.gavin / 100)),
         humphreys: Math.round(total * (fv.humphreys / 100)),
-      } as any;
+      };
       const firstWinner = Object.keys(votes).find((c) => votes[c] >= quota);
       console.assert(firstWinner === 'connolly', 'Connolly should win in first round in test');
 
@@ -635,8 +638,8 @@ if (typeof window !== 'undefined') {
         gavin: { connolly: 45, humphreys: 55 },
         humphreys: { connolly: 50, gavin: 50 },
       };
-      Object.values(tp).forEach((row: any) => {
-        const sum = Object.values(row).reduce((s: number, x: number) => s + x, 0);
+      Object.values(tp).forEach((row) => {
+        const sum = Object.values(row).reduce((s, x) => s + x, 0);
         console.assert(sum === 100, 'Each transfer row should sum to 100');
       });
 
@@ -650,14 +653,14 @@ if (typeof window !== 'undefined') {
       console.assert(Math.abs(pct - (bPct + tPct)) < 1e-9, 'Stacked percentage should add up');
 
       // Test 6: hide transfers when any first pref >=51
-      const prefs: any = { a: 51, b: 30, c: 19 };
+      const prefs = { a: 51, b: 30, c: 19 };
       console.assert(Math.max(...Object.values(prefs)) >= 51, 'Should hide transfers when a candidate ≥51%');
 
       // Test 7: only one lock allowed
-      const singleLock = (id: string) => ({ connolly: id==='connolly', gavin: id==='gavin', humphreys: id==='humphreys' });
+      const singleLock = (id) => ({ connolly: id==='connolly', gavin: id==='gavin', humphreys: id==='humphreys' });
       const L1 = singleLock('gavin');
       const lockedCount = Object.values(L1).filter(Boolean).length;
-      console.assert(lockedCount === 1 && (L1 as any).gavin, 'Exactly one candidate should be locked at a time');
+      console.assert(lockedCount === 1 && L1.gavin, 'Exactly one candidate should be locked at a time');
 
       // Done
       console.log('[IrishElectionDemo] Dev tests passed');

@@ -1,6 +1,6 @@
 \
 import React, { useState, useEffect, useMemo } from 'react';
-import * as Icons from 'lucide-react';
+import { Award, Info, Users, RefreshCw, Lock, Unlock, MapPin, Briefcase, Heart, X, TrendingUp } from 'lucide-react';
 
 /**
  * IrishElectionDemo — No-Animation

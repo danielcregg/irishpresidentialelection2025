@@ -4,9 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Irish Presidential Election 2025 — STV Demo</title>
+    <meta name="description" content="Interactive tool to simulate the 2025 Irish Presidential Election using the Single Transferable Vote (STV) system. Explore how first preferences and transfers affect the outcome." />
+    <meta name="keywords" content="Irish Presidential Election, 2025 Election, STV, Single Transferable Vote, Ireland, politics, election simulator, Catherine Connolly, Jim Gavin, Heather Humphreys" />
+    <link rel="canonical" href="https://irish-election-2025-stv.vercel.app/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://irish-election-2025-stv.vercel.app/" />
+    <meta property="og:title" content="Irish Presidential Election 2025 — STV Demo" />
+    <meta property="og:description" content="Interactive tool to simulate the 2025 Irish Presidential Election using the Single Transferable Vote (STV) system. Explore how first preferences and transfers affect the outcome." />
+    <meta property="og:image" content="https://irish-election-2025-stv.vercel.app/social-preview.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://irish-election-2025-stv.vercel.app/" />
+    <meta property="twitter:title" content="Irish Presidential Election 2025 — STV Demo" />
+    <meta property="twitter:description" content="Interactive tool to simulate the 2025 Irish Presidential Election using the Single Transferable Vote (STV) system. Explore how first preferences and transfers affect the outcome." />
+    <meta property="twitter:image" content="https://irish-election-2025-stv.vercel.app/social-preview.png" />
   </head>
   <body class="min-h-screen">
     <div id="root"></div>
+    <noscript>
+      <h1>Irish Presidential Election 2025 — STV Demo</h1>
+      <p>This is an interactive tool to simulate the 2025 Irish Presidential Election using the Single Transferable Vote (STV) system. Adjust first preference votes and see how transfer preferences determine the final winner.</p>
+      <h2>Candidates</h2>
+      <ul>
+        <li>Catherine Connolly (Independent)</li>
+        <li>Jim Gavin (Fianna Fáil)</li>
+        <li>Heather Humphreys (Fine Gael)</li>
+      </ul>
+      <h2>What is STV?</h2>
+      <p>The Single Transferable Vote is a voting system where voters rank candidates in order of preference. If a voter's first choice is eliminated, their vote is transferred to their next preference. A candidate needs to reach a certain quota of votes (50% + 1) to be elected.</p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

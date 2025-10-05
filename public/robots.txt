@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://irish-election-2025-stv.vercel.app/sitemap.xml

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Award, Info, Users, RefreshCw, Lock, Unlock, MapPin, Briefcase, Heart, X, TrendingUp } from 'lucide-react';
 
 /**
@@ -97,14 +97,14 @@ export default function IrishElectionDemo() {
   // --- Effects ---
   useEffect(() => {
     calculateElection();
-  }, [firstPrefs, transferPrefs, turnout]);
+  }, [calculateElection]);
 
   useEffect(() => {
     fetchLiveOdds();
   }, []);
 
   // --- Logic ---
-  const calculateElection = () => {
+  const calculateElection = useCallback(() => {
     const currentVotes = {
       connolly: Math.round(totalVotes * (firstPrefs.connolly / 100)),
       gavin: Math.round(totalVotes * (firstPrefs.gavin / 100)),
@@ -161,7 +161,7 @@ export default function IrishElectionDemo() {
 
     setRounds(roundsData);
     setWinner(finalWinner);
-  };
+  }, [firstPrefs, transferPrefs, totalVotes, quota, candidates]);
 
   const handleFirstPrefChange = (candidateId, value) => {
     const v = Math.max(0, Math.min(100, parseInt(String(value)) || 0));
